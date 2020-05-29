@@ -1,5 +1,1 @@
-/logs/*
-/mysql/*
-!/mysql
-!/logs
 /.idea/
