@@ -7,7 +7,7 @@ git clone https://github.com/smerdeff/morion.git
 cd morion
 docker-compose up
 
-# init sql from /www/backend/init.sql
+# init sql from www/backend/init.sql
 ```
 
 #### Example api
