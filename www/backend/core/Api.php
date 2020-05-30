@@ -17,25 +17,24 @@ abstract class Api
     public $requestParams = [];
     public $requestBody = '';
 
-    protected $action = ''; //Название метод для выполнения
+    protected $action = ''; //name function for action
 
 
     public function __construct()
     {
-        header("Access-Control-Allow-Orgin: *");
+        header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: *");
         header("Content-Type: application/json");
 
-        //Массив GET параметров разделенных слешем
+        //Array GET request split '/'
         $this->requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
         array_shift($this->requestUri); #remove api
         array_shift($this->requestUri); #remove model
 
-
         $this->requestParams = $_REQUEST;
         $this->requestBody = file_get_contents('php://input');
 
-        //Определение метода запроса
+        //Check Header
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
             if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {
@@ -102,9 +101,8 @@ abstract class Api
     }
 
     /**
-     * Метод GET
-     * Вывод списка всех записей
-     * http://ДОМЕН/models
+     * Method GET
+     * http://domen/models
      * @return string
      */
     public function readAction()
@@ -117,9 +115,8 @@ abstract class Api
     }
 
     /**
-     * Метод GET
-     * Просмотр отдельной записи (по id)
-     * http://ДОМЕН/models/id
+     * Method GET
+     * http://domen/models/id
      * @return string
      */
     public function retrieveAction()
@@ -135,34 +132,32 @@ abstract class Api
     }
 
     /**
-     * Метод DELETE
-     * Удаление отдельной записи (по ее id)
-     * http://ДОМЕН/models/id
+     * Method DELETE
+     * http://domen/models/id
      * @return string
      */
     public function destroyAction()
     {
         $id = array_shift($this->requestUri);
         if (!$id || !$this->model::retrieve($id)) {
-            return $this->response("Task with id=$id not found", 404);
+            return $this->response("Data with id=$id not found", 404);
         }
-        if (Task::destroy($id)) {
+        if ($this->model::destroy($id)) {
             return $this->response('Data deleted.', 200);
         }
         return $this->response("Delete error", 500);
     }
 
     /**
-     * Метод PUT
-     * Обновление отдельной записи (по ее id)
-     * http://ДОМЕН/models/id + body json
+     * Method PUT
+     * http://domen/models/id + body json
      * @return string
      */
     public function updateAction()
     {
         $id = array_shift($this->requestUri);
         if (!$id || !$this->model::retrieve($id)) {
-            return $this->response("Task with id=$id not found", 404);
+            return $this->response("Data with id=$id not found", 404);
         }
 
         if ($this->requestBody) {
@@ -177,9 +172,8 @@ abstract class Api
     }
 
     /**
-     * Метод POST
-     * Создание новой записи
-     * http://ДОМЕН/models + body json
+     * Method POST
+     * http://domen/models + body json
      * @return string
      */
     public function createAction()

@@ -1,6 +1,6 @@
 <?php
-require_once('Model.php');
-require_once('DB.php');
+require_once(__dir__.'/../core/Model.php');
+require_once(__dir__.'/../core/DB.php');
 
 class Task extends Model
 {

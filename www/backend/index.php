@@ -1,11 +1,14 @@
 <?php
 
-require_once('DB.php');
-require_once('TaskApi.php');
-require_once('UserApi.php');
+require_once(__dir__.'/core/DB.php');
+require_once(__dir__.'/controllers/TaskApi.php');
+require_once(__dir__.'/controllers/UserApi.php');
 
 /**
  * Simple auto router
+ * !work with web-server redirect!
+ * nginx: rewrite ^/api/(.*)$ /index.php;
+ * apache: RewriteRule ^api/(.*)$ /index.php
  */
 
 $apis = [];

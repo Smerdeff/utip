@@ -1,6 +1,6 @@
 <?php
-require_once('Api.php');
-require_once('Task.php');
+require_once(__dir__.'/../core/Api.php');
+require_once(__dir__.'/../models/Task.php');
 
 class TaskApi extends Api
 {

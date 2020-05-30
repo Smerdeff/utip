@@ -1,6 +1,6 @@
 <?php
-require_once('Api.php');
-require_once('User.php');
+require_once(__dir__.'/../core/Api.php');
+require_once(__dir__.'/../models/User.php');
 
 class UserApi extends Api
 {
