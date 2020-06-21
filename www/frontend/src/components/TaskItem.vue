@@ -1,24 +1,34 @@
 <template>
-    <li>
-        <strong>{{task.username}}</strong>
+    <li class="list-group-item">
+        <strong class="float-left">{{task.id}}</strong>
+        <div>
+            <span>{{task.created_at}}</span>
+            <span>{{task.username}}</span>
+        </div>
         <span>{{task.body}}</span>
-        <button>&times;</button>
+        <b-button variant="danger" @click="DESTROY_TASKS(task)" >&times;</b-button>
     </li>
 </template>
 
-
 <script>
+  import {mapActions} from 'vuex';
   export default {
-    props:{
-      task:{Object,
-        required:true,
+    name: "TaskItem",
+    props: {
+      task: {
+        Object,
+        required: true,
       }
     },
-    name: "TaskItem.vue"
+    methods: mapActions(['DESTROY_TASKS']),
+
   }
+
+  // console.log(task);
+
 </script>
 
 <style scoped>
-    
+
 
 </style>

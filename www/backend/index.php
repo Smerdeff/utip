@@ -1,8 +1,9 @@
 <?php
 
-require_once(__dir__.'/core/DB.php');
-require_once(__dir__.'/controllers/TaskApi.php');
-require_once(__dir__.'/controllers/UserApi.php');
+require_once(__dir__ . '/core/DB.php');
+require_once(__dir__ . '/controllers/TaskApi.php');
+require_once(__dir__ . '/controllers/UserApi.php');
+require_once(__dir__ . '/controllers/ImageApi.php');
 
 /**
  * Simple auto router
@@ -11,10 +12,11 @@ require_once(__dir__.'/controllers/UserApi.php');
  * apache: RewriteRule ^api/(.*)$ /index.php
  */
 
+
 $apis = [];
-#Add api in router
-array_push($apis, TaskApi::class);
-array_push($apis, UserApi::class);
+#Add api in auto router
+array_push($apis, ImageApi::class);
+//array_push($apis, UserApi::class);
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
 
@@ -28,3 +30,5 @@ if (array_shift($requestUri) == 'api') {
         }
     }
 }
+
+

@@ -6,6 +6,13 @@ abstract class Api
 
     protected $model = Model::Class;
     static $apiName = '';
+    static $actions = array(
+        'GET:/'=>'readAction',
+        'GET:/id'=>'readAction',
+        'POST:/'=>'createAction',
+        'PUT:/'=>'updateAction',
+        'DELETE:/'=>'destroyAction',
+    );
 
     static function get_apiname()
     {
@@ -50,6 +57,7 @@ abstract class Api
 
     public function run()
     {
+
         $this->action = $this->getAction();
          if (method_exists($this, $this->action)) {
             return $this->{$this->action}();
@@ -109,6 +117,7 @@ abstract class Api
     {
         $data = $this->model::read();
         if ($data) {
+//            var_dump($data);
             return $this->response($data, 200);
         }
         return $this->response('Data not found', 404);
