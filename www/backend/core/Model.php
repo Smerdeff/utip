@@ -32,12 +32,13 @@ abstract class Model
 
     static function read($filer=[], $exclude=[])
     {
-        $p_string = urldecode(http_build_query(escape($filer), '', ' and '));
-        $p_string .= ' not '. urldecode(http_build_query(escape($exclude), '', ' and '));
-
-        var_dump($p_string);
         self::check_fields();
         $db = static::db();
+        $p_string = urldecode(http_build_query(static::escape($db, $filer), '', ' and '));
+        $p_string .= ' not '. urldecode(http_build_query(static::escape($db, $exclude), '', ' and '));
+
+//        var_dump($p_string);
+
         $orders = '';
         if (static::$orders) {
             $orders = 'order by ' . static::$orders;
@@ -46,7 +47,7 @@ abstract class Model
             implode(",", static::$fields),
             static::$table_name,
              $orders);
-        var_dump($query);
+//        var_dump($query);
         $stmt = $db->query($query);
 
         $data = [];
@@ -65,28 +66,28 @@ abstract class Model
 
     }
 
-//    static function retrieve($id)
-//    {
-//        self::check_fields();
-//        $db = static::db();
-//        $query = sprintf('select %s from %s where %s = %s', implode(",", static::$fields), static::$table_name, static::$key_field, $id);
-//        $stmt = $db->query($query);
-//        $data = [];
-//        $data["data"] = [];
-//        if ($stmt) {
-//            while ($row = $stmt->fetch_assoc()) {
-//                $item = [];
-//                foreach (static::$fields as &$field) {
-//                    $item[$field] = $row[$field];
-//                }
-//                array_push($data["data"], $item);
-//            }
-//        }
-//        if (!$data["data"]) {
-//            return Null;
-//        }
-//        return $data;
-//    }
+    static function retrieve($id)
+    {
+        self::check_fields();
+        $db = static::db();
+        $query = sprintf('select %s from %s where %s = %s', implode(",", static::$fields), static::$table_name, static::$key_field, $id);
+        $stmt = $db->query($query);
+        $data = [];
+        $data["data"] = [];
+        if ($stmt) {
+            while ($row = $stmt->fetch_assoc()) {
+                $item = [];
+                foreach (static::$fields as &$field) {
+                    $item[$field] = $row[$field];
+                }
+                array_push($data["data"], $item);
+            }
+        }
+        if (!$data["data"]) {
+            return Null;
+        }
+        return $data;
+    }
 
     function destroy($id)
     {
