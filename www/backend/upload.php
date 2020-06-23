@@ -37,20 +37,21 @@ if ($_FILES["file"]["size"] > 500000) {
 
 
 $hash_file = hash_file('md5', $_FILES["file"]["tmp_name"]);
-$filter = [
-    "file_hash" => $hash_file,
-    ];
-$ret = Image::read($filter);
+//$filter = [
+//    "file_hash" => $hash_file,
+//    ];
+//$ret = Image::read($filter);
+//
+//
+//if ($ret['data']) {
+//    $unique_file_name = $ret['data'][0]['file_name'];
+//} else   {
 
-
-if ($ret['data']) {
-    $unique_file_name = $ret['data'][0]['file_name'];
-} else {
     if (!move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
         header("HTTP/1.1 500 'Internal Server Error'");
         echo "Sorry, there was an error uploading your file.";
         return;
-    }
+//    }
 }
 
 $data = array(

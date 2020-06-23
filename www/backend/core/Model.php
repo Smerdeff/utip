@@ -89,14 +89,14 @@ abstract class Model
         return $data;
     }
 
-    function destroy($id)
+    static function destroy($id)
     {
         $db = static::db();
         $query = sprintf('delete from %s where %s = %s', static::$table_name, static::$key_field, $id);
         return $db->query($query);;
     }
 
-    function validate(array $data)
+    static function validate(array $data)
     {
         self::check_fields();
         $validated_data = [];
@@ -108,7 +108,7 @@ abstract class Model
         return $validated_data;
     }
 
-    function update($id, array $data)
+    static function update($id, array $data)
     {
         $db = static::db();
         $data = static::escape($db, $data);
@@ -122,7 +122,7 @@ abstract class Model
             return false;
     }
 
-    function create(array $data)
+    static function create(array $data)
     {
         $db = static::db();
         $data = static::escape($db, $data);
