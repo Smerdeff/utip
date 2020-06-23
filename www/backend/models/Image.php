@@ -6,8 +6,10 @@ class Image extends Model
 {
     static $table_name = 'images';
     static $fields = ['id', 'file_name', 'status', 'created_at', 'title', 'description'];
-    static $read_only_fields = ['id', 'created_at'];
+    static $read_only_fields = ['id', 'created_at', 'status'];
     static $key_field = 'id';
+    static $orders = 'id';
+
 
     static function db()
     {

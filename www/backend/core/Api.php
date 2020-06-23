@@ -6,31 +6,24 @@ abstract class Api
 
     protected $model = Model::Class;
     static $apiName = '';
-    static $actions = array(
-        'GET:/'=>'readAction',
-        'GET:/id'=>'readAction',
-        'POST:/'=>'createAction',
-        'PUT:/'=>'updateAction',
-        'DELETE:/'=>'destroyAction',
-    );
 
     static function get_apiname()
     {
         return static::$apiName;
     }
 
-    protected $method = ''; //GET|POST|PUT|DELETE
+    public $method = ''; //GET|POST|PUT|DELETE
     public $requestUri = [];
     public $requestParams = [];
     public $requestBody = '';
-
     protected $action = ''; //name function for action
-
 
     public function __construct()
     {
+
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Methods: *");
+        header("Access-Control-Allow-Headers: *");
         header("Content-Type: application/json");
 
         //Array GET request split '/'
@@ -55,18 +48,7 @@ abstract class Api
 
     }
 
-    public function run()
-    {
-
-        $this->action = $this->getAction();
-         if (method_exists($this, $this->action)) {
-            return $this->{$this->action}();
-        } else {
-            throw new RuntimeException('Invalid Method', 405);
-        }
-    }
-
-    protected function response($data, $status = 500)
+    public function response($data, $status = 500)
     {
         header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
         return json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -83,30 +65,6 @@ abstract class Api
         return ($status[$code]) ? $status[$code] : $status[500];
     }
 
-    protected function getAction()
-    {
-        $method = $this->method;
-        switch ($method) {
-            case 'GET':
-                if ($this->requestUri) {
-                    return 'retrieveAction';
-                } else {
-                    return 'readAction';
-                }
-                break;
-            case 'POST':
-                return 'createAction';
-                break;
-            case 'PUT':
-                return 'updateAction';
-                break;
-            case 'DELETE':
-                return 'destroyAction';
-                break;
-            default:
-                return null;
-        }
-    }
 
     /**
      * Method GET
@@ -117,28 +75,11 @@ abstract class Api
     {
         $data = $this->model::read();
         if ($data) {
-//            var_dump($data);
             return $this->response($data, 200);
         }
         return $this->response('Data not found', 404);
     }
 
-    /**
-     * Method GET
-     * http://domen/models/id
-     * @return string
-     */
-    public function retrieveAction()
-    {
-        $id = array_shift($this->requestUri);
-        if ($id) {
-            $data = $this->model::retrieve($id);
-            if ($data) {
-                return $this->response($data, 200);
-            }
-        }
-        return $this->response('Data not found', 404);
-    }
 
     /**
      * Method DELETE
@@ -171,13 +112,14 @@ abstract class Api
 
         if ($this->requestBody) {
             $data = json_decode($this->requestBody, TRUE);
+
             if ($data) {
-                if ($this->model::update($id, $data)) {
+                if ($this->model::update($id, $this->model::validate($data))) {
                     return $this->response('Data updated.', 200);
                 }
             }
         }
-        return $this->response("Update error", 400);
+        return $this->response("Update error1", 400);
     }
 
     /**
@@ -190,7 +132,7 @@ abstract class Api
         if ($this->requestBody) {
             $data = json_decode($this->requestBody, TRUE);
             if ($data) {
-                if ($this->model::create($data)) {
+                if ($this->model::create($this->model::validate($data))) {
                     return $this->response('Data updated.', 200);
                 }
             }

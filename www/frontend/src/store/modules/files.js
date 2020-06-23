@@ -17,7 +17,7 @@ export default {
       state.files = files
     },
     ADD_FILE: (state, file) => {
-      const index = state.files.findIndex(item => item.name == file.name)
+      const index = state.files.findIndex(item => item.name === file.name)
       if (index >= 0) {
 
       } else {
@@ -29,7 +29,7 @@ export default {
     },
 
     DELETE_FILE: (state, file) => {
-      const index = state.files.findIndex(item => item.name == file.name)
+      const index = state.files.findIndex(item => item.name === file.name)
       if (index >= 0) {
         // console.log(file)
         Vue.delete(state.files, index);
@@ -75,12 +75,13 @@ export default {
           formData,
           {
             headers: {
-              'Content-Type': 'multipart/form-data'
+              'Content-Type': 'images'
             },
             // onUploadProgress: progressEvent => console.log(progressEvent.loaded) //TODO upload progress
           })
         .then(response => {
           context.commit('DELETE_FILE', file)
+          context.commit('ADD_IMAGE', response.data)
         })
         .catch(error => console.log(error));
     },

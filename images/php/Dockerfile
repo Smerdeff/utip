@@ -8,14 +8,19 @@ MAINTAINER https://github.com/Smerdeff <smerdeva@gmail.com>
 # В данном случае мы установим некоторые зависимости и модули PHP.
 # Для установки модулей используем команду docker-php-ext-install.
 # На каждый RUN создается новый слой в образе, поэтому рекомендуется объединять команды.
+#RUN docker-php-ext-install pdo_mysql
 RUN apt-get update && apt-get install -y \
         libfreetype6-dev \
         libjpeg62-turbo-dev \
         libpng-dev \
+#        gcc make autoconf libc-dev pkg-config libpcre3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) mysqli gd
+#    && pecl7.4-sp install oauth \
+#    && docker-php-ext-enable imagick smbclient oauth \
+    && docker-php-ext-install -j$(nproc) mysqli gd exif pdo_mysql
 
 
+#RUN docker-php-ext-install  oauth
 # Куда же без composer'а.
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 

@@ -1,21 +1,25 @@
 <template>
     <div>
-        <b-form-file
-                v-model="files"
-                :state="Boolean(files)"
-                placeholder="Choose a file or drop it here..."
-                multiple accept="image/*"
-        >
-            <template slot="file-name" slot-scope="{ names }">
-                <b-badge variant="dark">{{ names[0] }}</b-badge>
-                <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
-                    + {{ names.length - 1 }} More FILES
-                </b-badge>
-            </template>
-        </b-form-file>
-        <b-button @click="upload" class="mr-2">Upload</b-button>
-        <b-button @click="clear">Clear</b-button>
-
+        <b-input-group prepend="Upload" class="mt-3">
+            <b-form-file
+                    v-model="files"
+                    ref="file-input"
+                    :state="Boolean(files)"
+                    placeholder="Choose a file or drop it here..."
+                    multiple accept="image/*"
+            >
+                <template slot="file-name" slot-scope="{ names }">
+                    <b-badge variant="dark">{{ names[0] }}</b-badge>
+                    <b-badge v-if="names.length > 1" variant="dark" class="ml-1">
+                        + {{ names.length - 1 }} More FILES
+                    </b-badge>
+                </template>
+            </b-form-file>
+            <b-input-group-append>
+                <b-button @click="clear" variant="outline-success">Clear</b-button>
+                <b-button @click="upload" variant="info">Upload</b-button>
+            </b-input-group-append>
+        </b-input-group>
         <b-container fluid class="p-4 bg-dark">
             <b-row>
                 <b-col v-for="file in FILES" :key="file.name">
@@ -43,8 +47,10 @@
         this.FILES.forEach((file, index) => {
           this.$store.dispatch('POST_FILE', file)
         })
+        // this.$store.dispatch('READ_IMAGES')
       },
       clear() {
+        this.$refs['file-input'].reset();
         this.$store.dispatch('CLEAR_FILES')
       },
     },
@@ -54,10 +60,7 @@
       },
 
     },
-
     computed: mapGetters(['FILES']),
-    // methods: mapActions(['SET_FILES']),
-
     components: {
       UploadImageBlock,
     },

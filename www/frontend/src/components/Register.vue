@@ -48,7 +48,7 @@
           is_admin: this.is_admin,
           password_confirm: this.password_confirm
         }
-        this.$store.dispatch('register', data)
+        this.$store.dispatch('REGISTER', data)
           .then(() => this.$router.push('/'))
           .catch(err => console.log(err))
       }

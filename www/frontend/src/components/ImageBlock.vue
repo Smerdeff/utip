@@ -1,33 +1,74 @@
 <template>
     <div>
-        <div>
-            <b-img v-on:click="checked=!checked" v-bind:class="(checked)?'':'img_dark'" thumbnail fluid
-                   :src="imageData"></b-img>
-        </div>
+        <!--               v-bind:class="(checked)?'':'img_dark'"-->
+        <b-modal v-model="modalShow"
+                 @ok="handleOk">
+            <ImageForm v-bind:image="image"/>
 
-        <!--        <div>-->
-        <!--            <b-form-checkbox v-model="checked" name="check-button" switch>-->
-        <!--            </b-form-checkbox>-->
-        <!--        </div>-->
+        </b-modal>
+        <!--               v-b-tooltip.hover -->
+        <b-img v-on:click="imageClick"
+               :src="thumbnail_path"
+               :alt="image.title"
+               :title="image.title"
+               thumbnail fluid
+        >
+        </b-img>
+        <p v-if="is_select_mode "><b-form-checkbox size="lg" v-model="selected"></b-form-checkbox></p>
     </div>
 </template>
 
 <script>
+  import ImageForm from '@/components/ImageForm'
+  import {mapGetters, mapActions} from 'vuex';
+
   export default {
-    name: "UploadImageBlock",
+    name: "ImageBlock",
     data() {
       return {
         imageData: "",
         checked: true,
+        currentImage: null,
+        modalShow: false,
+        selected: false,
       }
     },
-    props: ['image'],
+    props: ['image', 'is_select_mode'],
     mounted: function () {
-      this.loadimage() //method1 will execute at pageload
+      this.loadimage()
+    },
+    computed: {
+      thumbnail_path: function () {
+        return "http://localhost/uploads/thumbnail/" + this.image.file_name
+      }
+
     },
     methods: {
       loadimage: function () {
       },
+      image_click: function () {
+        console.log(this.image.id)
+      },
+      handleOk(bvModalEvt) {
+        this.$store.dispatch('UPDATE_IMAGES', this.image)
+      },
+      imageClick(bvModalEvt) {
+        if (this.is_select_mode) {
+          this.selected = !this.selected
+        } else {
+          this.modalShow = !this.modalShow
+        }
+      },
+    },
+    watch: {
+      selected: function (val) {
+        // console.log(this.image.id, val )
+        this.$store.dispatch('UPDATE_SELECTED', {id:this.image.id, selected:val})
+      }
+
+    },
+    components: {
+      ImageForm,
     },
 
   }

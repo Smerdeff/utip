@@ -1,12 +1,10 @@
 <?php
 
 require_once(__dir__ . '/core/DB.php');
-require_once(__dir__ . '/controllers/TaskApi.php');
 require_once(__dir__ . '/controllers/UserApi.php');
 require_once(__dir__ . '/controllers/ImageApi.php');
-
 /**
- * Simple auto router
+ * Router
  * !work with web-server redirect!
  * nginx: rewrite ^/api/(.*)$ /index.php;
  * apache: RewriteRule ^api/(.*)$ /index.php
@@ -15,17 +13,42 @@ require_once(__dir__ . '/controllers/ImageApi.php');
 
 $apis = [];
 #Add api in auto router
-array_push($apis, ImageApi::class);
+//array_push($apis, ImageApi::class);
 //array_push($apis, UserApi::class);
 
 $requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
 
 if (array_shift($requestUri) == 'api') {
     if ($apinname = array_shift($requestUri)) {
-        foreach ($apis as &$api) {
-            if ($apinname == $api::get_apiname()) {
-                $new_api = new $api;
-                echo $new_api->run();
+        if ($apinname == 'images') {
+            $new_api = new ImageApi;
+            if ($new_api->method === 'GET') {
+                echo $new_api->readAction();
+                return;
+            }
+            if ($new_api->method === 'PUT') {
+                echo $new_api->updateAction();
+                return;
+            }
+            if ($new_api->method === 'DELETE') {
+                echo $new_api->destroyAction();
+                return;
+            }
+        }
+        if ($apinname == 'accounts') {
+            if ($apinname = array_shift($requestUri)) {
+                if ($apinname == 'register') {
+                    $new_api = new UserApi;
+                    if ($new_api->method === 'POST') {
+                        $new_api->registerUser();
+                    }
+                }
+                if ($apinname == 'login') {
+                    $new_api = new UserApi;
+                    if ($new_api->method === 'POST') {
+                        $new_api->loginUser();
+                    }
+                }
             }
         }
     }

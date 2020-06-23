@@ -12,6 +12,7 @@
     </div>
 </template>
 <script>
+
   export default {
     data() {
       return {
@@ -23,7 +24,7 @@
       login: function () {
         let login = this.user
         let password = this.password
-        this.$store.dispatch('login', {login: login, password})
+        this.$store.dispatch('LOGIN', {login: login, password})
           .then(() => this.$router.push('/'))
           .catch(err => console.log(err))
       }
