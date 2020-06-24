@@ -22,7 +22,8 @@ class UserApi extends Api
                     "user" => $user
                 ];
                 return $this->response($ret_data, 200);
-            }
+            } else
+                return $this->response('Unauthorized', 401);
         }
     }
 

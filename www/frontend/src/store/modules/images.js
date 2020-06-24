@@ -10,7 +10,7 @@ export default {
   },
   getters: {
     IMAGES(state) {
-      return state.images.reverse()
+      return state.images
 
     },
     IS_SELECT_MODE(state) {

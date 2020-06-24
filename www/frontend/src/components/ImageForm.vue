@@ -13,12 +13,27 @@
 <script>
   export default {
     name: "ImageForm",
+    data() {
+      return {
+        title: '',
+        description: '',
+      }
+    },
     props: ['image'],
     computed: {
       image_path: function () {
         return "http://localhost/uploads/" + this.image.file_name
       }
-    }
+    },
+    mounted() {
+      this.onload();
+    },
+    methods: {
+      onload() {
+        this.title = this.image.title;
+        this.description = this.image.description;
+        }
+    },
   }
 </script>
 

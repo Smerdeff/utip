@@ -107,7 +107,7 @@ abstract class Model
             static::$table_name,
             $where,
             $orders);
-//        var_dump($query);
+
         $stmt = $db->query($query);
 
         $data = [];

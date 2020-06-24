@@ -38,6 +38,7 @@ class ImageApi extends Api
                     ],
                 ];
             $this->filter = array_merge($this->filter, $search);
+
         }
 
         return parent::readAction();

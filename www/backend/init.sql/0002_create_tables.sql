@@ -12,21 +12,23 @@ create table users
         unique (email)
 );
 
-CREATE TABLE `images` (
-                          `id` int(11) NOT NULL AUTO_INCREMENT,
-                          `file_name` varchar(128) NOT NULL,
-                          `created_at` timestamp  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                          `status` enum('1','0') NOT NULL DEFAULT '1',
-                          `user_id` int,
-                          `title` varchar(128),
-                          `description` varchar(2048),
-                          `file_hash` char(32),
-                          index (user_id),
-                          index (file_hash),
-                          FOREIGN KEY (user_id)
-                              REFERENCES users(id)
-                              ON DELETE NO ACTION ,
-                          PRIMARY KEY (`id`)
+create table images
+(
+    id          int auto_increment
+        primary key,
+    file_name   varchar(128)                              not null,
+    created_at  timestamp       default CURRENT_TIMESTAMP not null,
+    user_id     int                                       not null,
+    title       varchar(128)                              null,
+    description varchar(2048)                             null,
+    file_hash   char(32)                                  not null,
+    constraint images_users
+        foreign key (user_id) references users (id)
 );
 
+create index images_file_hash_index
+    on images (file_hash);
+
+create index user_id
+    on images (user_id);
 

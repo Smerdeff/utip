@@ -66,8 +66,8 @@ export default {
         })
     },
     REGISTER({commit}, user) {
-      return new Promise((resolve, reject) => {
-        commit('AUTH_SUCCESS')
+      // return new Promise((resolve, reject) => {
+      //   commit('AUTH_SUCCESS')
 
         Axios.post('http://localhost/api/accounts/register/', user)
           .then(resp => {
@@ -77,14 +77,14 @@ export default {
             // Add the following line:
             Axios.defaults.headers.common['Authorization'] = token
             commit('AUTH_SUCCESS', {token:token, user:user})
-            resolve(resp)
+            // resolve(resp)
           })
           .catch(err => {
             commit('AUTH_ERROR', err)
             localStorage.removeItem('token')
-            reject(err)
+            // reject(err)
           })
-      })
+      // })
     },
     LOGOUT({commit}) {
       return new Promise((resolve, reject) => {
