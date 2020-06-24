@@ -1,14 +1,16 @@
 <template>
-    <div >
+    <div>
         <h2>Vue Gallery example</h2>
-        <router-link to="/gallery">Gallery</router-link>
-        <br>
-        <span v-if="isLoggedIn"> <b-button @click="LOGOUT">Logout</b-button></span>
-        <br>
-        <Login/>
-        <br>
-        <Register/>
+        <ul>
+            <li>
+                <router-link to="/gallery">Gallery</router-link>
+            </li>
+            <li>
+                <router-link to="/register">Register</router-link>
+            </li>
+        </ul>
     </div>
+
 </template>
 
 <script>
@@ -20,7 +22,7 @@
     name: "Home",
     computed: mapGetters(['isLoggedIn']),
     methods: mapActions(['LOGOUT']),
-    components:{
+    components: {
       Login,
       Register
     }

@@ -5,16 +5,23 @@ import Axios from 'axios'
 export default {
   state: {
     files: [],
+    is_add_mode: false,
   },
   getters: {
     FILES(state) {
       return state.files
     },
-
+    IS_ADD_MODE(state) {
+      return state.is_add_mode
+    },
   },
   mutations: {
     SET_FILES: (state, files) => {
       state.files = files
+    },
+    SWITCH_ADD_MODE: (state) => {
+      state.is_add_mode = !state.is_add_mode
+      // console.log(state.is_add_mode )
     },
     ADD_FILE: (state, file) => {
       const index = state.files.findIndex(item => item.name === file.name)
@@ -42,6 +49,9 @@ export default {
 
   },
   actions: {
+    ADD_MODE: async (context) => {
+      context.commit('SWITCH_ADD_MODE')
+    },
     // READ_TASKS: async (context) => {
     //   await Axios
     //     .get(`http://localhost/api/tasks/`)
@@ -71,7 +81,7 @@ export default {
       let formData = new FormData();
       formData.append('file', file);
       await Axios
-        .post(`http://localhost/upload.php`,
+        .post(`http://localhost/api/images/upload`,
           formData,
           {
             headers: {

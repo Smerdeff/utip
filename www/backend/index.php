@@ -30,6 +30,14 @@ if (array_shift($requestUri) == 'api') {
                 echo $new_api->updateAction();
                 return;
             }
+            if ($new_api->method === 'POST') {
+                if ($apinname = array_shift($requestUri)) {
+                    if ($apinname == 'upload') {
+                        echo $new_api->upload();
+                        return;
+                    }
+                }
+            }
             if ($new_api->method === 'DELETE') {
                 echo $new_api->destroyAction();
                 return;
@@ -40,14 +48,21 @@ if (array_shift($requestUri) == 'api') {
                 if ($apinname == 'register') {
                     $new_api = new UserApi;
                     if ($new_api->method === 'POST') {
-                        $new_api->registerUser();
+                        echo $new_api->registerUser();
+                        return;
                     }
                 }
                 if ($apinname == 'login') {
                     $new_api = new UserApi;
                     if ($new_api->method === 'POST') {
-                        $new_api->loginUser();
+                        echo $new_api->loginUser();
+                        return;
                     }
+                }
+                $new_api = new UserApi;
+                if ($new_api->method === 'GET') {
+                    echo $new_api->tokenUser();
+                    return;
                 }
             }
         }

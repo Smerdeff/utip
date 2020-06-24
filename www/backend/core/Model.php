@@ -8,6 +8,7 @@ abstract class Model
     static $key_field = 'id'; #default key field 'id'
     static $orders = '';
 
+
     static abstract function db();
 
     public static function get_table_name()
@@ -15,11 +16,18 @@ abstract class Model
         return static::$table_name;
     }
 
+    public static function key_field()
+    {
+        return static::$key_field;
+    }
+
     function escape($db, $data)
     {
         #escape and quoted
         foreach ($data as $key => &$value) {
-            $value = "'" . mysqli_real_escape_string($db, $value) . "'";
+            if (gettype($value) == 'string') {
+                $value = "'" . mysqli_real_escape_string($db, $value) . "'";
+            }
         }
         return $data;
     }
@@ -30,37 +38,88 @@ abstract class Model
         array_push(static::$read_only_fields, static::$key_field);
     }
 
-    static function read($filer=[], $exclude=[])
+    static function collect_filter($db, $filter, $logical = 'AND')
+    {
+        if ($logical == 'AND') $is_and = true; else $is_and = false;
+        if ($logical == 'OR') $is_or = true; else $is_or = false;
+        if ($logical == 'NOT') $is_not = true; else $is_not = false;
+
+        $where = '';
+        $i = -1;
+        if ($filter) {
+            foreach ($filter as $key => $value) {
+                $i++;
+                if ($i == 0) {
+                    if ($is_not) $where .= ' not ';
+                    $where .= '(';
+                }
+                if ($i > 0) {
+                    if ($is_or) $where .= ' or ';
+                    else $where .= ' and ';
+                }
+                if ($key == '&&') {
+                    $where .= static::collect_filter($db, $filter['&&'], 'AND');
+                    continue;
+                }
+                if ($key == '||') {
+                    $where .= static::collect_filter($db, $filter['||'], 'OR');
+                    continue;
+                }
+                if ($key == '!=') {
+                    $where .= static::collect_filter($db, $filter['!='], 'NOT');
+                    continue;
+                }
+
+                if ($e = explode('__', $key)) {
+                    $suffix = array_pop($e);
+                    if ($suffix == 'icontains') {
+                        $value = mysqli_real_escape_string($db, $value);
+                        $where .= implode($e) . " like '%$value%'";
+                    } else {
+                        if (gettype($value) == 'string') {
+                            $where .= $key . "='" . mysqli_real_escape_string($db, $value) . "'";
+                        } else {
+                            $where .= $key . "=" . $value . "";
+                        }
+
+                    }
+                }
+
+            }
+            $where .= ')';
+        }
+        return $where;
+    }
+
+    static function read($filter = [])
     {
         self::check_fields();
         $db = static::db();
-        $p_string = urldecode(http_build_query(static::escape($db, $filer), '', ' and '));
-        $p_string .= ' not '. urldecode(http_build_query(static::escape($db, $exclude), '', ' and '));
-
-//        var_dump($p_string);
+        $where = '';
+        if ($filter) $where .= ' where ' . static::collect_filter($db, $filter);
 
         $orders = '';
         if (static::$orders) {
             $orders = 'order by ' . static::$orders;
         }
-        $query = sprintf('select %s from %s %s ',
+        $query = sprintf('select %s from %s %s %s ',
             implode(",", static::$fields),
             static::$table_name,
-             $orders);
+            $where,
+            $orders);
 //        var_dump($query);
         $stmt = $db->query($query);
 
         $data = [];
-        $data["data"] = [];
         if ($stmt) {
             while ($row = $stmt->fetch_assoc()) {
                 $item = [];
                 foreach (static::$fields as &$field) {
                     $item[$field] = $row[$field];
                 }
-                array_push($data["data"], $item);
+                array_push($data, $item);
             }
-        }
+        } else return false;
 
         return $data;
 
@@ -68,32 +127,22 @@ abstract class Model
 
     static function retrieve($id)
     {
-        self::check_fields();
-        $db = static::db();
-        $query = sprintf('select %s from %s where %s = %s', implode(",", static::$fields), static::$table_name, static::$key_field, $id);
-        $stmt = $db->query($query);
-        $data = [];
-        $data["data"] = [];
-        if ($stmt) {
-            while ($row = $stmt->fetch_assoc()) {
-                $item = [];
-                foreach (static::$fields as &$field) {
-                    $item[$field] = $row[$field];
-                }
-                array_push($data["data"], $item);
-            }
-        }
-        if (!$data["data"]) {
-            return Null;
-        }
-        return $data;
+        return static::read([static::$key_field => $id]);
     }
 
-    static function destroy($id)
+    static function destroy(array $filter)
     {
         $db = static::db();
-        $query = sprintf('delete from %s where %s = %s', static::$table_name, static::$key_field, $id);
-        return $db->query($query);;
+        $where = '';
+        if ($filter) $where .= ' where ' . static::collect_filter($db, $filter);
+        if (!$where) return false;
+        $item = static::read($filter);
+        if (!$item) return false;
+        $query = sprintf('delete from %s %s', static::$table_name, $where);
+        if ($db->query($query)) {
+            return $item;
+        } else
+        return false;
     }
 
     static function validate(array $data)
@@ -108,16 +157,18 @@ abstract class Model
         return $validated_data;
     }
 
-    static function update($id, array $data)
+    static function update(array $filter, array $data)
     {
         $db = static::db();
         $data = static::escape($db, $data);
+        $where = '';
+        if ($filter) $where .= ' where ' . static::collect_filter($db, $filter);
         $p_string = urldecode(http_build_query($data, '', ','));
+        if (!$where) return false;
 
-        $query = sprintf('Update %s set %s where %s = %s', static::$table_name, $p_string, static::$key_field, $id);
-        var_dump($data, $query);
+        $query = sprintf('Update %s set %s %s', static::$table_name, $p_string, $where);
         if ($db->query($query)) {
-            return static::retrieve($id);
+            return static::read($filter);
         } else
             return false;
     }

@@ -2,45 +2,54 @@
 require_once(__dir__ . '/../core/Api.php');
 require_once(__dir__ . '/../models/User.php');
 
+
 class UserApi extends Api
 {
     static $apiName = 'accounts';
     protected $model = User::Class;
 
-    public function userByToken($token)
+
+    public function tokenUser()
     {
-        $filter = array(
-            "token" => $token,
-        );
-        User::read($filter);
+        if (isset($this->requestUri[0])) {
+            $filter = array(
+                "token" => $this->requestUri[0],
+            );
+            $ret = User::read($filter);
+            if ($ret) {
+                $user = $ret[0];
+                $ret_data = [
+                    "user" => $user
+                ];
+                return $this->response($ret_data, 200);
+            }
+        }
     }
 
     public function loginUser()
     {
         $data = json_decode($this->requestBody, TRUE);
 
-        $filter = array(
+        $filter = [
             "email" => $data['login'],
             "password" => md5($data['password'])
-        );
+        ];
 
         $ret = User::read($filter);
-        if ($ret['data']) {
-//            $_SESSION['user_id'] = $ret['data'][0]['id'];
-            $user = $ret['data'][0];
+        if ($ret) {
+            $user = $ret[0];
             $token = bin2hex(openssl_random_pseudo_bytes(8));
             $upd_data = array("token" => $token,);
 
-            User::update($user['id'], $upd_data); #Сохранили токен
-            $ret_data = array(
+            User::update(['id' => $user['id']], $upd_data); #Сохранили токен
+            $ret_data = [
                 "token" => $token,
-                "user" => $user);
-
-            header("HTTP/1.1 302 Found");
-            return json_encode($ret_data, JSON_UNESCAPED_UNICODE);
+                "user" => $user
+            ];
+            return $this->response($ret_data, 200);
 
         } else {
-            header("HTTP/1.1 403 Forbidden");
+            return $this->response([], 401);
         }
     }
 

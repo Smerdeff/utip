@@ -25,7 +25,8 @@
         let login = this.user
         let password = this.password
         this.$store.dispatch('LOGIN', {login: login, password})
-          .then(() => this.$router.push('/'))
+          .then(() => this.$router.push('gallery/'))
+          // .then(() => console.log('login'))
           .catch(err => console.log(err))
       }
     }

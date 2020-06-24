@@ -12,10 +12,11 @@ export default {
     AUTH_REQUEST(state) {
       state.status = 'loading'
     },
-    AUTH_SUCCESS(state, token, user) {
+    AUTH_SUCCESS(state, payload) {
       state.status = 'success'
-      state.token = token
-      state.user = user
+      state.token = payload.token
+      state.user = payload.user
+      // console.log( payload)
     },
     AUTH_ERROR(state) {
       state.status = 'error'
@@ -32,12 +33,13 @@ export default {
         commit('AUTH_REQUEST')
         Axios.post('http://localhost/api/accounts/login/', user)
           .then(resp => {
+            // console.log(resp.data);
             const token = resp.data.token
             const user = resp.data.user
             localStorage.setItem('token', token)
             // Add the following line:
             Axios.defaults.headers.common['Authorization'] = token
-            commit('AUTH_SUCCESS', token, user)
+            commit('AUTH_SUCCESS', {token:token, user:user})
             resolve(resp)
           })
           .catch(err => {
@@ -48,6 +50,21 @@ export default {
       })
     },
 
+    TOKEN_LOGIN(context) {
+      Axios.defaults.headers.common['Authorization'] = context.state.token
+      Axios.get(`http://localhost/api/accounts/${context.state.token}`, )
+        .then(resp => {
+          const user = resp.data.user
+          // Axios.defaults.headers.common['Authorization'] = context.state.token
+          context.commit('AUTH_SUCCESS', {token: context.state.token, user:user})
+          // resolve(resp)
+        })
+        .catch(err => {
+          context.commit('AUTH_ERROR', err)
+          localStorage.removeItem('token')
+          // reject(err)
+        })
+    },
     REGISTER({commit}, user) {
       return new Promise((resolve, reject) => {
         commit('AUTH_SUCCESS')
@@ -59,7 +76,7 @@ export default {
             localStorage.setItem('token', token)
             // Add the following line:
             Axios.defaults.headers.common['Authorization'] = token
-            commit('AUTH_SUCCESS', token, user)
+            commit('AUTH_SUCCESS', {token:token, user:user})
             resolve(resp)
           })
           .catch(err => {
@@ -79,6 +96,8 @@ export default {
     }
   },
   getters: {
+    USER: state => state.user,
+    TOKEN: state => state.token,
     isLoggedIn: state => !!state.token,
     authStatus: state => state.status,
   }

@@ -43,9 +43,10 @@ export default {
       state.images = images.data
     },
     ADD_IMAGE: (state, image) => {
-      const index = state.images.findIndex(item => item.id === image.data[0].id)
+      // console.log(image)
+      const index = state.images.findIndex(item => item.id === image[0].id)
       if (index < 0) {
-        state.images.push(image.data[0])
+        state.images.push(image[0])
       }
     },
 

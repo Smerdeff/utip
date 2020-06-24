@@ -6,6 +6,7 @@ abstract class Api
 
     protected $model = Model::Class;
     static $apiName = '';
+    public $filter = [];
 
     static function get_apiname()
     {
@@ -16,6 +17,7 @@ abstract class Api
     public $requestUri = [];
     public $requestParams = [];
     public $requestBody = '';
+    public $headers = '';
     protected $action = ''; //name function for action
 
     public function __construct()
@@ -33,7 +35,7 @@ abstract class Api
 
         $this->requestParams = $_REQUEST;
         $this->requestBody = file_get_contents('php://input');
-
+        $this->headers = getallheaders();
         //Check Header
         $this->method = $_SERVER['REQUEST_METHOD'];
         if ($this->method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {
@@ -50,6 +52,9 @@ abstract class Api
 
     public function response($data, $status = 500)
     {
+        if (gettype($data) != 'array') {
+            $data = ['message' => $data];
+        }
         header("HTTP/1.1 " . $status . " " . $this->requestStatus($status));
         return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
@@ -58,8 +63,14 @@ abstract class Api
     {
         $status = array(
             200 => 'OK',
+            302 => 'Found',
+            401 => 'Unauthorized',
+            403 => 'Forbidden',
             404 => 'Not Found',
             405 => 'Method Not Allowed',
+            409 => 'Conflict',
+            413 => 'Request Entity Too Large',
+            415 => 'Unsupported Media Type',
             500 => 'Internal Server Error',
         );
         return ($status[$code]) ? $status[$code] : $status[500];
@@ -73,11 +84,8 @@ abstract class Api
      */
     public function readAction()
     {
-        $data = $this->model::read();
-        if ($data) {
-            return $this->response($data, 200);
-        }
-        return $this->response('Data not found', 404);
+        $data = $this->model::read($this->filter);
+        return $this->response(['data' => $data], 200);
     }
 
 
@@ -88,14 +96,14 @@ abstract class Api
      */
     public function destroyAction()
     {
-        $id = array_shift($this->requestUri);
-        if (!$id || !$this->model::retrieve($id)) {
-            return $this->response("Data with id=$id not found", 404);
+        if (isset($this->requestUri[0])) {
+            $this->filter[$this->model::key_field()] = $this->requestUri[0];
+            if ($item = $this->model::destroy($this->filter)) {
+                return $this->response($item, 200);
+            }
         }
-        if ($this->model::destroy($id)) {
-            return $this->response('Data deleted.', 200);
-        }
-        return $this->response("Delete error", 500);
+        return $this->response("Delete error", 404);
+
     }
 
     /**
@@ -105,21 +113,18 @@ abstract class Api
      */
     public function updateAction()
     {
-        $id = array_shift($this->requestUri);
-        if (!$id || !$this->model::retrieve($id)) {
-            return $this->response("Data with id=$id not found", 404);
-        }
-
-        if ($this->requestBody) {
-            $data = json_decode($this->requestBody, TRUE);
-
-            if ($data) {
-                if ($this->model::update($id, $this->model::validate($data))) {
-                    return $this->response('Data updated.', 200);
+        if (isset($this->requestUri[0])) {
+            $this->filter[$this->model::key_field()] = $this->requestUri[0];
+            if ($this->requestBody) {
+                $data = json_decode($this->requestBody, true);
+                if ($data) {
+                    if ($item = $this->model::update($this->filter, $this->model::validate($data))) {
+                        return $this->response($item, 200);
+                    }
                 }
             }
         }
-        return $this->response("Update error1", 400);
+        return $this->response("Update error", 404);
     }
 
     /**
@@ -130,7 +135,7 @@ abstract class Api
     public function createAction()
     {
         if ($this->requestBody) {
-            $data = json_decode($this->requestBody, TRUE);
+            $data = json_decode($this->requestBody, true);
             if ($data) {
                 if ($this->model::create($this->model::validate($data))) {
                     return $this->response('Data updated.', 200);
