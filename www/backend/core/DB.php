@@ -6,7 +6,7 @@
 class DB
 {
     #TODO need config
-    const  DB_HOST = "172.20.0.1";
+    const  DB_HOST = "172.17.0.1";
     const  DB_USER = "root";
     const  DB_PASS = "secret";
     const  DB_NAME = "utip";
