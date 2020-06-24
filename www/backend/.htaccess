@@ -3,8 +3,6 @@ IndexIgnore */*
 RewriteEngine on
 
 # Перенаправление с ДОМЕН на ДОМЕН/api
-RewriteCond %{REQUEST_URI} ^/$
-RewriteRule ^(.*)$ /api/$1 [R=301]
 
 #Если URI начинается с api/ то перенаправлять все запросы на index.php
 RewriteEngine On
