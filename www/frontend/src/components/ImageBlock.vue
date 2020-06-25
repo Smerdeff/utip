@@ -39,7 +39,7 @@
     },
     computed: {
       thumbnail_path: function () {
-        return "http://localhost/uploads/thumbnail/" + this.image.file_name
+        return "http://localhost/api/thumbnail/" + this.image.file_name
       }
 
     },

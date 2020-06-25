@@ -20,12 +20,28 @@ $requestUri = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
 
 if (array_shift($requestUri) == 'api') {
     if ($apinname = array_shift($requestUri)) {
-        if ($apinname == 'images') {
+
+
+        if ($apinname == 'thumbnail') {
+            $new_api = new ImageApi;
+            if ($new_api->method === 'GET') {
+                echo $new_api->image(array_shift($requestUri));
+            }
+        }
+
+        if ($apinname == 'image') {
+            $new_api = new ImageApi;
+            if ($new_api->method === 'GET') {
+                echo $new_api->image(array_shift($requestUri), false);
+            }
+        }
+
+            if ($apinname == 'images') {
             $new_api = new ImageApi;
             if ($new_api->method === 'GET') {
                 echo $new_api->readAction();
-                return;
             }
+
             if ($new_api->method === 'PUT') {
                 echo $new_api->updateAction();
                 return;

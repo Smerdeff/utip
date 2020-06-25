@@ -69,9 +69,9 @@ class ImageApi extends Api
         $item = Image::read($filter);
 
         if ($item) {
-            $item=$item[0];
+            $item = $item[0];
             $target_dir = __dir__ . '/../uploads/';
-            $target_thumbnail_dir = __dir__.'/../uploads/thumbnail/';
+            $target_thumbnail_dir = __dir__ . '/../uploads/thumbnail/';
 
             $filter = [
                 'file_hash' => $item['file_hash'],
@@ -142,6 +142,34 @@ class ImageApi extends Api
 
         createThumbnail($target_dir . $unique_file_name, $target_thumbnail_dir . $unique_file_name, 160);
         return $this->response(Image::create($data), 200);
+    }
+
+
+    public function image($file, $is_thumbnail = true)
+    {
+
+        if ($is_thumbnail) {
+            $file = 'uploads/thumbnail/' . $file;
+        } else {
+            $file = 'uploads/' . $file;
+        }
+
+        if (file_exists($file)) {
+            $image_info = getimagesize($file);
+            header('Content-Type: ' . $image_info['mime']);
+            header('Content-Length: ' . filesize($file));
+            readfile($file);
+        } else { // Image file not found
+//            header($_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
+            header("Content-Type: image/png");
+            $im = @imagecreate(80, 80)
+            or die("Невозможно создать поток изображения");
+            $background_color = imagecolorallocate($im, 0, 0, 0);
+            $text_color = imagecolorallocate($im, 233, 14, 91);
+            imagestring($im, 10, 5, 30, "No image", $text_color);
+            imagepng($im);
+            imagedestroy($im);
+        }
     }
 
 }

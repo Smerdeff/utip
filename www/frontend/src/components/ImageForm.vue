@@ -22,7 +22,7 @@
     props: ['image'],
     computed: {
       image_path: function () {
-        return "http://localhost/uploads/" + this.image.file_name
+        return "http://localhost/api/image/" + this.image.file_name
       }
     },
     mounted() {
